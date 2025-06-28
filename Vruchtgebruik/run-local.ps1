@@ -1,7 +1,7 @@
 # CONFIGURATION
-$RepoUrl = "https://github.com/your-username/vruchtgebruik-api.git"
-$RepoDir = "vruchtgebruik-api"
-$ProjectDir = "Vruchtgebruik.Api"  # Update if your project folder is different
+$RepoUrl = "https://github.com/gcroes/vruchtgebruik.git"
+$RepoDir = "vruchtgebruik\Vruchtgebruik"
+$ProjectDir = "Vruchtgebruik.Api"
 
 Write-Host ""
 Write-Host "==== STEP 1: Cloning the repository ====" -ForegroundColor Cyan
@@ -21,7 +21,7 @@ Set-Location $RepoDir
 Write-Host ""
 Write-Host "==== STEP 2: Restoring dependencies ====" -ForegroundColor Cyan
 
-dotnet restore
+dotnet restore "$ProjectDir"
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Error restoring dependencies!"
     exit 1
@@ -30,21 +30,20 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host ""
 Write-Host "==== STEP 3: Building the project ====" -ForegroundColor Cyan
 
-dotnet build
+dotnet build "$ProjectDir"
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Build failed!"
     exit 1
 }
 
 Write-Host ""
-Write-Host "==== STEP 4: Running the API ====" -ForegroundColor Cyan
-
-dotnet run --project $ProjectDir
+Write-Host "`n==== STEP 4: Running the API ====" -ForegroundColor Cyan
+Write-Host "Browse to http://localhost:5005/swagger after startup.`n"
+dotnet run --project "$ProjectDir\Vruchtgebruik.Api.csproj" --urls "http://localhost:5005"
 if ($LASTEXITCODE -ne 0) {
     Write-Error "API failed to start!"
     exit 1
 }
 
-Write-Host ""
 Write-Host "API stopped. Press Enter to exit."
 Read-Host
