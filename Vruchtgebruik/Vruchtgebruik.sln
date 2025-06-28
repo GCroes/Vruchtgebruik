@@ -10,6 +10,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployment", "Deployment", 
 		run-local.ps1 = run-local.ps1
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vruchtgebruik.FrontEnd.Server", "Vruchtgebruik.FrontEnd\Vruchtgebruik.FrontEnd.Server\Vruchtgebruik.FrontEnd.Server.csproj", "{BC93E4BD-3209-4296-A6E9-BAEB645D55B4}"
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "vruchtgebruik.frontend.client", "Vruchtgebruik.FrontEnd\vruchtgebruik.frontend.client\vruchtgebruik.frontend.client.esproj", "{774632F9-89C0-4747-A5C4-7B7428927E42}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +24,16 @@ Global
 		{72D66E46-7C23-44E1-B404-3212A3901268}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{72D66E46-7C23-44E1-B404-3212A3901268}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{72D66E46-7C23-44E1-B404-3212A3901268}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC93E4BD-3209-4296-A6E9-BAEB645D55B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC93E4BD-3209-4296-A6E9-BAEB645D55B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC93E4BD-3209-4296-A6E9-BAEB645D55B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC93E4BD-3209-4296-A6E9-BAEB645D55B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{774632F9-89C0-4747-A5C4-7B7428927E42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{774632F9-89C0-4747-A5C4-7B7428927E42}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{774632F9-89C0-4747-A5C4-7B7428927E42}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{774632F9-89C0-4747-A5C4-7B7428927E42}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{774632F9-89C0-4747-A5C4-7B7428927E42}.Release|Any CPU.Build.0 = Release|Any CPU
+		{774632F9-89C0-4747-A5C4-7B7428927E42}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
