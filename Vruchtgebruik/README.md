@@ -62,6 +62,10 @@ After the Angular application is up and running, use the URLs below to navigate 
 - **API Swagger UI:** [http://localhost:5005/swagger](http://localhost:5005/swagger)
 - **Frontend UI:** [http://localhost:4200](http://localhost:4200)
 
+**Note!** 
+- The applications run over http. 
+- The applications can run over https, but it is not supported in by the run-local.ps1 script and configured to run over https as I do not know what type of local certificates you use. 
+
 🚀 Ready to run!!!!
 ---
 
