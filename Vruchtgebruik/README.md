@@ -64,7 +64,7 @@ After the Angular application is up and running, use the URLs below to navigate 
 
 **Note!** 
 - The applications run over http. 
-- The applications can run over https, but it is not supported by the run-local.ps1 script and configured to run over https as I do not know what type of local certificates you use. 
+- The applications can run over https, but it is not supported by the run-local.ps1 script and not configured to run over https as I do not know what type of local certificates you use. 
 
 🚀 Ready to run!!!!
 ---
