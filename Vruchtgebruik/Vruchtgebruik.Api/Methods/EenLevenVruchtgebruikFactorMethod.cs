@@ -5,21 +5,48 @@ using Vruchtgebruik.Api.Settings;
 
 namespace Vruchtgebruik.Api.Methods
 {
+    /// <summary>
+    /// Implements the "EenLeven" factor calculation method for determining the usage value
+    /// based on Dutch tax rules. Calculates the value using age-adjusted factors from configuration.
+    /// </summary>
     public class EenLevenVruchtgebruikFactorMethod : IFactorCalculationMethod
     {
         private readonly EenLevenSettings _settings;
         private readonly AgeFactorSettings _ageFactorSettings;
         private readonly ILogger<CalculateController> _logger;
 
+        /// <summary>
+        /// Gets the name of the calculation method ("EenLeven").
+        /// </summary>
         public string Name => "EenLeven";
 
-        public EenLevenVruchtgebruikFactorMethod(EenLevenSettings settings, AgeFactorSettings ageFactorSettings, ILogger<CalculateController> logger)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EenLevenVruchtgebruikFactorMethod"/> class.
+        /// </summary>
+        /// <param name="settings">The factor table settings for the "EenLeven" method.</param>
+        /// <param name="ageFactorSettings">Settings for age adjustment by sex.</param>
+        /// <param name="logger">Logger for calculation and error events.</param>
+        public EenLevenVruchtgebruikFactorMethod(
+            EenLevenSettings settings,
+            AgeFactorSettings ageFactorSettings,
+            ILogger<CalculateController> logger)
         {
             _settings = settings;
             _ageFactorSettings = ageFactorSettings;
             _logger = logger;
         }
 
+        /// <summary>
+        /// Performs the calculation for the given request, adjusting age as per configuration,
+        /// finding the correct factor row, and computing the usage value. 
+        /// Logs calculation events and errors with the provided correlation ID.
+        /// </summary>
+        /// <param name="req">The calculation request, including asset value, age, and sex.</param>
+        /// <param name="correlationId">The correlation ID for tracking and logging.</param>
+        /// <returns>
+        /// A <see cref="CalculationResponse"/> containing the result of the calculation.
+        /// </returns>
+        /// <exception cref="ArgumentException">Thrown if no applicable factor is found for the adjusted age.</exception>
         public CalculationResponse Calculate(CalculationRequest req, Guid correlationId)
         {
             try
@@ -55,9 +82,9 @@ namespace Vruchtgebruik.Api.Methods
             catch (Exception ex)
             {
                 _logger.LogError(ex, "CorrelationId:{CorrelationId} - Exception occurred in {Method}: {Message}", correlationId, Name, ex.Message);
-                throw; 
+                throw;
             }
         }
-
     }
+
 }

@@ -10,9 +10,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployment", "Deployment", 
 		run-local.ps1 = run-local.ps1
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vruchtgebruik.FrontEnd.Server", "Vruchtgebruik.FrontEnd\Vruchtgebruik.FrontEnd.Server\Vruchtgebruik.FrontEnd.Server.csproj", "{BC93E4BD-3209-4296-A6E9-BAEB645D55B4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vruchtgebruik.FrontEnd.Server", "Vruchtgebruik.FrontEnd\Vruchtgebruik.FrontEnd.Server\Vruchtgebruik.FrontEnd.Server.csproj", "{BC93E4BD-3209-4296-A6E9-BAEB645D55B4}"
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "vruchtgebruik.frontend.client", "Vruchtgebruik.FrontEnd\vruchtgebruik.frontend.client\vruchtgebruik.frontend.client.esproj", "{774632F9-89C0-4747-A5C4-7B7428927E42}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vruchtgebruik.UnitTests", "Vruchtgebruik.UnitTests\Vruchtgebruik.UnitTests.csproj", "{3DD4B5AE-D01D-4183-A427-7523E38BC027}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vruchtgebruik.IntegrationTests", "Vruchtgebruik.IntegrationTests\Vruchtgebruik.IntegrationTests.csproj", "{46827FAD-E22F-4183-A397-33D49C4DAAB2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,6 +38,14 @@ Global
 		{774632F9-89C0-4747-A5C4-7B7428927E42}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{774632F9-89C0-4747-A5C4-7B7428927E42}.Release|Any CPU.Build.0 = Release|Any CPU
 		{774632F9-89C0-4747-A5C4-7B7428927E42}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{3DD4B5AE-D01D-4183-A427-7523E38BC027}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DD4B5AE-D01D-4183-A427-7523E38BC027}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DD4B5AE-D01D-4183-A427-7523E38BC027}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DD4B5AE-D01D-4183-A427-7523E38BC027}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46827FAD-E22F-4183-A397-33D49C4DAAB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46827FAD-E22F-4183-A397-33D49C4DAAB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46827FAD-E22F-4183-A397-33D49C4DAAB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46827FAD-E22F-4183-A397-33D49C4DAAB2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

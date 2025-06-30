@@ -1,6 +1,7 @@
 using FluentValidation;
 using Microsoft.Extensions.Options;
 using Serilog;
+using System.Reflection;
 using Vruchtgebruik.Api.Context;
 using Vruchtgebruik.Api.Factories;
 using Vruchtgebruik.Api.Interfaces;
@@ -8,6 +9,8 @@ using Vruchtgebruik.Api.Methods;
 using Vruchtgebruik.Api.Middleware;
 using Vruchtgebruik.Api.Settings;
 using Vruchtgebruik.Api.Validators;
+using System.Runtime.CompilerServices;
+[assembly: InternalsVisibleTo("Vruchtgebruik.IntegrationTests")]
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,9 +42,14 @@ builder.Services.AddScoped<ICorrelationContext, CorrelationContext>();
 builder.Services.AddValidatorsFromAssemblyContaining<CalculationRequestValidator>();
 
 builder.Services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+});
 
 builder.Services.AddCors(options =>
 {
@@ -66,15 +74,30 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<CorrelationIdMiddleware>();
 
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(ApiExceptionHandler.Handle);
+});
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
 
+// CORS - before controllers/endpoints
 app.UseCors();
 
 app.UseAuthorization();
 
 app.MapControllers();
 
+// Custom 404 handler
+app.Use(async (context, next) =>
+{
+    await next();
+    await NotFoundHandler.Handle(context);
+});
+
 app.Run();
+
+public partial class Program { }

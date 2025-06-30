@@ -1,1 +1,35 @@
 /* You can add global styles to this file, and also import other style files */
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.full-width {
+  width: 100%;
+}
+
+mat-card {
+  max-width: 430px;
+  margin: 2rem auto;
+}
+
+mat-card-content.result {
+  text-align: left;
+  background-color: mediumaquamarine;
+}
+
+mat-card-content.result h2 {
+  text-align: left; /* Override if h2 is centered elsewhere */
+}
+
+.api-error {
+  color: #c62828;
+  background: #fff0f0;
+  border: 1px solid #e57373;
+  padding: 12px 16px;
+  margin: 10px 0;
+  border-radius: 4px;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

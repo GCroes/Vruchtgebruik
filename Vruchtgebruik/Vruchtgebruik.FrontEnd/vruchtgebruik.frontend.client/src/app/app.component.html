@@ -1,71 +1,80 @@
-<h1>Asset Usage Value Calculator</h1>
+<mat-card>
+  <mat-card-title>
+    Asset Usage Value Calculator
+  </mat-card-title>
 
-<form [formGroup]="calcForm" (ngSubmit)="onSubmit()" novalidate>
-  <div>
-    <label for="assetValue">Asset Value:</label>
-    <input type="number" id="assetValue" formControlName="assetValue" />
-    <ng-container *ngFor="let validation of validationMessages.assetValue">
-      <div class="error"
-           *ngIf="calcForm.controls['assetValue'].hasError(validation.type) && (calcForm.controls['assetValue'].dirty || calcForm.controls['assetValue'].touched)">
-        {{validation.message}}
-      </div>
-    </ng-container>
+  <div class="spinner-container" *ngIf="loading" style="text-align: center; margin: 16px;">
+    <mat-spinner [diameter]="40"></mat-spinner>
   </div>
 
-  <div>
-    <label for="age">Asset Age:</label>
-    <input type="number" id="age" formControlName="age" />
-    <ng-container *ngFor="let validation of validationMessages.age">
-      <div class="error"
-           *ngIf="calcForm.controls['age'].hasError(validation.type) && (calcForm.controls['age'].dirty || calcForm.controls['age'].touched)">
-        {{validation.message}}
+  <mat-card-content>
+    <form [formGroup]="calcForm" (ngSubmit)="onSubmit()" novalidate>
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Eigendomswaarde</mat-label>
+        <input matInput type="number" formControlName="assetValue" />
+        <mat-hint>Voer de eigendomswaarde in.</mat-hint>
+        <mat-error *ngFor="let validation of validationMessages.assetValue">
+          <div *ngIf="calcForm.controls['assetValue'].hasError(validation.type)">
+            {{validation.message}}
+          </div>
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Leeftijd</mat-label>
+        <input matInput type="number" formControlName="age" />
+        <mat-hint>Voer uw leeftijd in.</mat-hint>
+        <mat-error *ngFor="let validation of validationMessages.age">
+          <div *ngIf="calcForm.controls['age'].hasError(validation.type)">
+            {{validation.message}}
+          </div>
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Geslacht</mat-label>
+        <mat-select formControlName="sex">
+          <mat-option value="">Select...</mat-option>
+          <mat-option value="male">Man</mat-option>
+          <mat-option value="female">Vrouw</mat-option>
+        </mat-select>
+        <mat-hint>Selecteer uw geslacht.</mat-hint>
+        <mat-error *ngFor="let validation of validationMessages.sex">
+          <div *ngIf="calcForm.controls['sex'].hasError(validation.type)">
+            {{validation.message}}
+          </div>
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Berekeningsmethode</mat-label>
+        <mat-select formControlName="factorMethod">
+          <mat-option value="">Select...</mat-option>
+          <mat-option value="EenLeven">Één Leven</mat-option>
+        </mat-select>
+        <mat-hint>Selecteer een berekeningsmethode.</mat-hint>
+        <mat-error *ngFor="let validation of validationMessages.factorMethod">
+          <div *ngIf="calcForm.controls['factorMethod'].hasError(validation.type)">
+            {{validation.message}}
+          </div>
+        </mat-error>
+      </mat-form-field>
+
+      <div *ngIf="apiError" class="api-error">
+        <mat-icon aria-hidden="true">error</mat-icon>
+        <span>{{ apiError }}</span>
       </div>
-    </ng-container>
-  </div>
 
-  <div>
-    <label for="sex">Sex:</label>
-    <select id="sex" formControlName="sex">
-      <option value="">Select...</option>
-      <option value="male">Male</option>
-      <option value="female">Female</option>
-    </select>
-    <ng-container *ngFor="let validation of validationMessages.sex">
-      <div class="error"
-           *ngIf="calcForm.controls['sex'].hasError(validation.type) && (calcForm.controls['sex'].dirty || calcForm.controls['sex'].touched)">
-        {{validation.message}}
-      </div>
-    </ng-container>
-  </div>
+      <button mat-raised-button color="primary" type="submit" [disabled]="calcForm.invalid || loading">Bereken</button>
+    </form>
+  </mat-card-content>
+</mat-card>
 
-  <div>
-    <label for="factorMethod">Factor Method:</label>
-    <select id="factorMethod" formControlName="factorMethod">
-      <option value="">Select...</option>
-      <option value="default">Default</option>
-      <option value="EenLeven">EenLeven</option>
-      <!-- Add more options here as your API supports -->
-    </select>
-    <ng-container *ngFor="let validation of validationMessages.factorMethod">
-      <div class="error"
-           *ngIf="calcForm.controls['factorMethod'].hasError(validation.type) && (calcForm.controls['factorMethod'].dirty || calcForm.controls['factorMethod'].touched)">
-        {{validation.message}}
-      </div>
-    </ng-container>
-  </div>
-
-  <button type="submit" [disabled]="calcForm.invalid">Calculate</button>
-</form>
-
-<!-- API/server error area -->
-<div *ngIf="apiError" class="error">
-  <p>{{ apiError }}</p>
-</div>
-
-<!-- Result display -->
-<div *ngIf="calcResult">
-  <h2>Calculation Result</h2>
-  <p>Eigendomswaarde: <strong>{{ calcResult.assetValue }}</strong></p>
-  <p>Factor: <strong>{{ calcResult.usedFactor }}</strong></p>
-  <p>Vruchtgebruikwaarde: <strong>{{ calcResult.usageValue }}</strong></p>
-</div>
+<mat-card *ngIf="calcResult && !loading" class="result">
+  <mat-card-content class="result">
+    <h2>Resultaat</h2>
+    <p>Eigendomswaarde: <strong>{{ calcResult.assetValue }}</strong></p>
+    <p>Factor: <strong>{{ calcResult.usedFactor }}</strong></p>
+    <p>Vruchtgebruikwaarde: <strong>{{ calcResult.usageValue }}</strong></p>
+  </mat-card-content>
+</mat-card>

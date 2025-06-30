@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CalculateService } from './services/calculate.service'; // Adjust path as needed
 import { CalculationRequest } from './interfaces/calculation-request'; // Adjust path as needed
 import { CalculationResponse } from './interfaces/calculation-response';
 import { ApiResult } from './interfaces/api-result';
+
 
 @Component({
   selector: 'app-root',
@@ -15,30 +16,32 @@ export class AppComponent implements OnInit {
   calcForm: FormGroup;
   calcResult: CalculationResponse | null = null;
   apiError: string | null = null;
+  loading = false;
 
   validationMessages = {
     assetValue: [
-      { type: 'required', message: 'Asset value is required.' },
-      { type: 'min', message: 'Must be greater than 0.' }
+      { type: 'required', message: 'Eigendomswaarde is verplicht.' },
+      { type: 'min', message: 'De waard moet groter zijn dan 0.' }
     ],
     age: [
-      { type: 'required', message: 'Age is required.' },
-      { type: 'min', message: 'Must be greater than 0.' }
+      { type: 'required', message: 'Leeftijd is verplicht.' },
+      { type: 'min', message: 'moet groter zijn dan 0.' }
     ],
     sex: [
-      { type: 'required', message: 'Sex is required.' }
+      { type: 'required', message: 'Geslacht is verplicht.' }
     ],
     factorMethod: [
-      { type: 'required', message: 'Factor method is required.' }
+      { type: 'required', message: 'Berekeningsmethode is verplicht.' }
     ]
   };
 
   constructor(private fb: FormBuilder, private calculateService: CalculateService) {
+
     this.calcForm = this.fb.group({
-      assetValue: [null, [Validators.required, Validators.min(1)]],
-      age: [null, [Validators.required, Validators.min(1)]],
-      sex: ['', Validators.required],
-      factorMethod: ['', Validators.required]
+      assetValue: new FormControl("", [Validators.required, Validators.min(1)]),
+      age: new FormControl("", [Validators.required, Validators.min(1)]),
+      sex: new FormControl("", Validators.required),
+      factorMethod: new FormControl("", Validators.required)
     });
   }
 
@@ -52,6 +55,7 @@ export class AppComponent implements OnInit {
 
     this.apiError = null;
     this.calcResult = null;
+    this.loading = true;
 
     const req: CalculationRequest = this.calcForm.value;
 
@@ -59,17 +63,25 @@ export class AppComponent implements OnInit {
       next: (response) => {
         console.log('API response:', response);
         this.calcResult = response.response;
+        this.loading = false;
       },
       error: (error) => {
-        if (error.error?.errors) {
-          // Handle server validation errors array
-          this.apiError = error.error.errors.map((e: any) => e.errorMessage || e.message).join('; ');
+        if (error.error?.errors && typeof error.error.errors === 'object') {
+          // ProblemDetails validation errors
+          const fieldErrors = Object.entries(error.error.errors as { [key: string]: string[] })
+            .map(([field, messages]) => `${field}: ${(messages as string[]).join(', ')}`)
+            .join('; ');
+          this.apiError = fieldErrors || error.error.title || "Validation error occurred.";
         } else if (error.error?.error) {
-          // Handle single server error (e.g., { error: "some error" })
+          // Legacy or custom error property
           this.apiError = error.error.error;
+        } else if (error.error?.title) {
+          // Generic ProblemDetails
+          this.apiError = error.error.title;
         } else {
           this.apiError = "An error occurred while calculating. Please try again.";
         }
+        this.loading = false;
       }
     });
   }
