@@ -57,6 +57,8 @@ You can use the included PowerShell script to automate the build and startup of 
 
 ## Using the Application
 
+After the Angular application is up and running, use the URLs below to navigate to the API and Angular application:
+
 - **API Swagger UI:** [http://localhost:5005/swagger](http://localhost:5005/swagger)
 - **Frontend UI:** [http://localhost:4200](http://localhost:4200)
 
