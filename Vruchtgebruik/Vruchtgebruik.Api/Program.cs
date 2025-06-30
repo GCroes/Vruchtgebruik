@@ -56,7 +56,7 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
     {
         policy
-            .WithOrigins("https://localhost:4200") // Your Angular dev URL
+            .WithOrigins("https://localhost:4200", "http://localhost:4200") // Your Angular dev URL
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -85,16 +85,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 // CORS - before controllers/endpoints
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-    {
-        policy
-            .WithOrigins("http://localhost:4200", "https://localhost:4200")
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
-});
+app.UseCors();
 
 app.UseAuthorization();
 
