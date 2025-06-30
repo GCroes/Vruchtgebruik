@@ -82,8 +82,6 @@ Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd `"$PWD`"; dotn
 Write-Host ""
 Write-Host "==== STEP 4: Running Angular Frontend in a new window ====" -ForegroundColor Green
 
-Write-Host $AngularDir
-
 if (Test-Path $AngularDir) {
     Push-Location $AngularDir
 
