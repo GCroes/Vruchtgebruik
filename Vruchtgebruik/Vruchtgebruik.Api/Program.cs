@@ -10,6 +10,11 @@ using Vruchtgebruik.Api.Middleware;
 using Vruchtgebruik.Api.Settings;
 using Vruchtgebruik.Api.Validators;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
+using Vruchtgebruik.Api.Extensions;
 [assembly: InternalsVisibleTo("Vruchtgebruik.IntegrationTests")]
 
 var builder = WebApplication.CreateBuilder(args);
@@ -43,6 +48,8 @@ builder.Services.AddValidatorsFromAssemblyContaining<CalculationRequestValidator
 
 builder.Services.AddControllers();
 
+builder.Services.AddHealthChecks();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -62,6 +69,12 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+});
+
+builder.Services.AddCustomRateLimiting();
 
 var app = builder.Build();
 
@@ -89,6 +102,10 @@ app.UseCors();
 
 app.UseAuthorization();
 
+app.UseRateLimiter();
+
+app.UseResponseCompression();
+
 app.MapControllers();
 
 // Custom 404 handler
@@ -97,6 +114,8 @@ app.Use(async (context, next) =>
     await next();
     await NotFoundHandler.Handle(context);
 });
+
+app.MapCustomHealthChecks();
 
 app.Run();
 

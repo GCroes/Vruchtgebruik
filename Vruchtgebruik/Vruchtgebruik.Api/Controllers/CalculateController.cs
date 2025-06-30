@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Vruchtgebruik.Api.Helpers;
 using Vruchtgebruik.Api.Interfaces;
 using Vruchtgebruik.Api.Models;
 
@@ -47,17 +48,16 @@ namespace Vruchtgebruik.Api.Controllers
         /// <remarks>
         /// Factor method determines the ruleset used for calculation. Validation and error responses follow RFC7807 (Problem Details).
         /// </remarks>
+        /// <summary>
+        /// Performs the calculation based on input.
+        /// </summary>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CalculationApiResponse))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<IActionResult> Calculate([FromBody] CalculationRequest req)
+        public async Task<ActionResult<CalculationApiResponse>> Calculate([FromBody] CalculationRequest req)
         {
             var correlationId = _correlationContext.CorrelationId;
-
-            _logger.LogInformation(
-                "CorrelationId:{CorrelationId} - Calculation requested: Method={FactorMethod}, AssetValue={AssetValue}, Age={Age}, Sex={Sex}",
-                correlationId, req.FactorMethod, req.AssetValue, req.Age, req.Sex);
 
             var validationResult = await _validator.ValidateAsync(req);
             if (!validationResult.IsValid)
@@ -65,14 +65,10 @@ namespace Vruchtgebruik.Api.Controllers
 
             try
             {
-                var strategy = _factory.GetStrategy(req.FactorMethod, correlationId);
+                var strategy = _factory.GetMethod(req.FactorMethod, correlationId);
                 var response = strategy.Calculate(req, correlationId);
 
-                _logger.LogInformation(
-                    "CorrelationId:{CorrelationId} - Calculation successful: Method={FactorMethod}, UsageValue={UsageValue}, UsedFactor={UsedFactor}",
-                    correlationId, req.FactorMethod, response.UsageValue, response.UsedFactor);
-
-                return Ok(new { correlationId, response });
+                return Ok(new CalculationApiResponse(correlationId.ToString(), response));
             }
             catch (ArgumentException ex)
             {
@@ -83,6 +79,8 @@ namespace Vruchtgebruik.Api.Controllers
                 return UnexpectedProblemResult(ex, req, correlationId);
             }
         }
+
+
 
 
 #if DEBUG
@@ -103,19 +101,17 @@ namespace Vruchtgebruik.Api.Controllers
         }
 #endif
 
-
         /// <summary>
-        /// Creates a Bad Request (<c>400</c>) <see cref="ValidationProblemDetails"/> response for invalid input,
-        /// logs the validation errors, and includes the correlation and trace IDs.
+        /// Generates a Bad Request (400) <see cref="ValidationProblemDetails"/> response for failed model validation,
+        /// including grouped errors, correlation/trace IDs, and logs the issue.
         /// </summary>
-        /// <param name="validationResult">The result of the FluentValidation validation process.</param>
-        /// <param name="req">The original calculation request payload.</param>
-        /// <param name="correlationId">The correlation ID associated with this request.</param>
+        /// <param name="validationResult">The FluentValidation result containing validation errors.</param>
+        /// <param name="req">The calculation request that failed validation.</param>
+        /// <param name="correlationId">The correlation ID for tracing this request through the system.</param>
         /// <returns>
-        /// An <see cref="IActionResult"/> containing the validation problem details and appropriate status code.
+        /// An <see cref="ActionResult{T}"/> containing a <see cref="ValidationProblemDetails"/> response with status 400.
         /// </returns>
-        /// <returns></returns>
-        private IActionResult ValidationProblemResult(FluentValidation.Results.ValidationResult validationResult,
+        private ActionResult<CalculationApiResponse> ValidationProblemResult(FluentValidation.Results.ValidationResult validationResult,
             CalculationRequest req, Guid correlationId)
         {
             var errors = validationResult.Errors
@@ -127,76 +123,71 @@ namespace Vruchtgebruik.Api.Controllers
 
             _logger.LogWarning(
                 "CorrelationId:{CorrelationId} - Validation failed for CalculationRequest: {@Errors} | Payload: {@Request}",
-                correlationId,
-                errors,
-                req
-            );
+                correlationId, errors, req);
 
-            var pd = new ValidationProblemDetails(errors)
-            {
-                Title = "Validation failed for the request.",
-                Status = StatusCodes.Status400BadRequest,
-                Instance = HttpContext.Request.Path
-            };
-            pd.Extensions["correlationId"] = correlationId.ToString();
-            pd.Extensions["traceId"] = HttpContext.TraceIdentifier;
+            var pd = ProblemDetailsHelper.CreateProblemDetails(
+                HttpContext,
+                StatusCodes.Status400BadRequest,
+                "Validation failed for the request.",
+                errorCode: "VAL-001",
+                errors: errors,
+                correlationId: correlationId.ToString()
+            );
 
             return BadRequest(pd);
         }
 
         /// <summary>
-        /// Creates a Bad Request (<c>400</c>) <see cref="ProblemDetails"/> response for argument-related errors
-        /// (such as missing factors or invalid input), logs the error, and includes the correlation and trace IDs.
+        /// Generates a Bad Request (400) <see cref="ProblemDetails"/> response for an <see cref="ArgumentException"/>
+        /// thrown during calculation, logging the error and including correlation/trace IDs.
         /// </summary>
         /// <param name="ex">The <see cref="ArgumentException"/> thrown by the business logic.</param>
-        /// <param name="req">The original calculation request payload.</param>
-        /// <param name="correlationId">The correlation ID associated with this request.</param>
+        /// <param name="req">The calculation request that caused the error.</param>
+        /// <param name="correlationId">The correlation ID for this request.</param>
         /// <returns>
-        /// An <see cref="IActionResult"/> containing the problem details and appropriate status code.
+        /// An <see cref="ActionResult{T}"/> containing a <see cref="ProblemDetails"/> response with status 400.
         /// </returns>
-        private IActionResult ArgumentProblemResult(ArgumentException ex, CalculationRequest req, Guid correlationId)
+        private ActionResult<CalculationApiResponse> ArgumentProblemResult(ArgumentException ex, CalculationRequest req, Guid correlationId)
         {
             _logger.LogWarning(ex,
                 "CorrelationId:{CorrelationId} - Calculation failed: Method={FactorMethod}, Error={ErrorMessage}",
                 correlationId, req.FactorMethod, ex.Message);
 
-            var pd = new ProblemDetails
-            {
-                Title = "Calculation error",
-                Detail = ex.Message,
-                Status = StatusCodes.Status400BadRequest,
-                Instance = HttpContext.Request.Path
-            };
-            pd.Extensions["correlationId"] = correlationId.ToString();
-            pd.Extensions["traceId"] = HttpContext.TraceIdentifier;
+            var pd = ProblemDetailsHelper.CreateProblemDetails(
+                HttpContext,
+                StatusCodes.Status400BadRequest,
+                "Calculation error",
+                detail: ex.Message,
+                errorCode: "CALC-001",
+                correlationId: correlationId.ToString()
+            );
 
             return BadRequest(pd);
         }
 
         /// <summary>
-        /// Creates an Internal Server Error (<c>500</c>) <see cref="ProblemDetails"/> response for unexpected or unhandled exceptions,
-        /// logs the error, and includes the correlation and trace IDs.
+        /// Generates an Internal Server Error (500) <see cref="ProblemDetails"/> response for unexpected/unhandled exceptions,
+        /// logging the exception and including correlation/trace IDs for diagnostics.
         /// </summary>
-        /// <param name="ex">The unhandled <see cref="Exception"/>.</param>
-        /// <param name="req">The original calculation request payload.</param>
-        /// <param name="correlationId">The correlation ID associated with this request.</param>
+        /// <param name="ex">The unexpected <see cref="Exception"/> that occurred during processing.</param>
+        /// <param name="req">The calculation request being processed when the exception occurred.</param>
+        /// <param name="correlationId">The correlation ID for this request.</param>
         /// <returns>
-        /// An <see cref="IActionResult"/> containing the problem details and appropriate status code.
+        /// An <see cref="ActionResult{T}"/> containing a <see cref="ProblemDetails"/> response with status 500.
         /// </returns>
-        private IActionResult UnexpectedProblemResult(Exception ex, CalculationRequest req, Guid correlationId)
+        private ActionResult<CalculationApiResponse> UnexpectedProblemResult(Exception ex, CalculationRequest req, Guid correlationId)
         {
             _logger.LogError(ex,
                 "CorrelationId:{CorrelationId} - Unexpected error in calculation: Method={FactorMethod}",
                 correlationId, req.FactorMethod);
 
-            var pd = new ProblemDetails
-            {
-                Title = "An unexpected error occurred.",
-                Status = StatusCodes.Status500InternalServerError,
-                Instance = HttpContext.Request.Path
-            };
-            pd.Extensions["correlationId"] = correlationId.ToString();
-            pd.Extensions["traceId"] = HttpContext.TraceIdentifier;
+            var pd = ProblemDetailsHelper.CreateProblemDetails(
+                HttpContext,
+                StatusCodes.Status500InternalServerError,
+                "An unexpected error occurred.",
+                errorCode: "GEN-500",
+                correlationId: correlationId.ToString()
+            );
 
             return StatusCode(500, pd);
         }
