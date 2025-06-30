@@ -18,7 +18,7 @@ namespace Vruchtgebruik.UnitTests
             var factory = new FactorCalculationMethodFactory(new[] { methodMock.Object }, loggerMock.Object);
 
             // Act
-            var strategy = factory.GetStrategy("TestMethod", Guid.NewGuid());
+            var strategy = factory.GetMethod("TestMethod", Guid.NewGuid());
 
             // Assert
             strategy.Should().Be(methodMock.Object);
@@ -32,7 +32,7 @@ namespace Vruchtgebruik.UnitTests
             var factory = new FactorCalculationMethodFactory(Array.Empty<IFactorCalculationMethod>(), loggerMock.Object);
 
             // Act
-            Action act = () => factory.GetStrategy("Unknown", Guid.NewGuid());
+            Action act = () => factory.GetMethod("Unknown", Guid.NewGuid());
 
             // Assert
             act.Should().Throw<ArgumentException>();

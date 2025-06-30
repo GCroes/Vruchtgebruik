@@ -26,7 +26,7 @@ namespace Vruchtgebruik.Api.Middleware
             var logger = loggerFactory.CreateLogger("ApiExceptionHandler");
 
             var traceId = context.TraceIdentifier;
-            string correlationId = context.Request.Headers["X-Correlation-Id"];
+            string correlationId = context.Request.Headers["X-Correlation-Id"].FirstOrDefault() ?? string.Empty;
 
             logger.LogError(exceptionHandlerPathFeature?.Error,
                 "Unhandled exception: {Message} | TraceId={TraceId} | CorrelationId={CorrelationId}",
@@ -36,7 +36,7 @@ namespace Vruchtgebruik.Api.Middleware
             {
                 Error = "An unexpected error occurred.",
                 TraceId = traceId,
-                CorrelationId = string.IsNullOrEmpty(correlationId) ? null : correlationId
+                CorrelationId = string.IsNullOrEmpty(correlationId) ? string.Empty : correlationId
             };
 
             await context.Response.WriteAsJsonAsync(apiError);

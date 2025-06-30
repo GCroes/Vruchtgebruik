@@ -22,7 +22,7 @@
         public string Sex { get; set; } = string.Empty;
 
         /// <summary>
-        /// The name of the factor calculation method to use (e.g., "EenLeven", "Vruchtgebruik").
+        /// The name of the factor calculation method to use (e.g., "ÉénLeven", "Vruchtgebruik").
         /// </summary>
         public string FactorMethod { get; set; } = string.Empty;
     }

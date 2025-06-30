@@ -11,24 +11,23 @@ namespace Vruchtgebruik.Api.Helpers
             HttpContext httpContext,
             int statusCode,
             string title,
-            string detail = null,
-            string errorCode = null,
-            string supportUrl = null,
-            IDictionary<string, string[]> errors = null,
-            string instance = null,
-            string correlationId = null)
+            string? detail = null,
+            string? errorCode = null,
+            string? supportUrl = null,
+            IDictionary<string, string[]>? errors = null,
+            string? instance = null,
+            string? correlationId = null)
         {
             ProblemDetails pd = errors == null
                 ? new ProblemDetails()
                 : new ValidationProblemDetails(errors);
 
-            pd.Title = title;
+            pd.Title = title ?? string.Empty;
             pd.Status = statusCode;
-            pd.Detail = detail;
-            pd.Instance = instance ?? httpContext.Request.Path;
+            pd.Detail = detail ?? string.Empty;
+            pd.Instance = instance ?? httpContext.Request.Path.ToString();
 
-            // Standard extensions
-            pd.Extensions["traceId"] = httpContext.TraceIdentifier;
+            pd.Extensions["traceId"] = httpContext.TraceIdentifier ?? string.Empty;
             pd.Extensions["timestamp"] = DateTimeOffset.UtcNow;
 
             if (!string.IsNullOrEmpty(correlationId))
@@ -40,5 +39,6 @@ namespace Vruchtgebruik.Api.Helpers
 
             return pd;
         }
+
     }
 }

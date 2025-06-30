@@ -31,12 +31,20 @@ builder.Host.UseSerilog();
 
 // Add services to the container.
 
-// Configure settings as before
-builder.Services.Configure<EenLevenSettings>(builder.Configuration.GetSection("FactorMethods:EenLeven"));
-builder.Services.AddSingleton(resolver => resolver.GetRequiredService<IOptions<EenLevenSettings>>().Value);
+// Register …ÈnLevenSettings with custom validation
+builder.Services.AddValidatedSettings<EenLevenSettings>(
+    builder.Configuration.GetSection("FactorMethods:EenLeven"),
+    settings => !string.IsNullOrEmpty(settings.ActiveVersion)
+                && settings.Versions != null
+                && settings.Versions.Any(),
+    "EenLevenSettings are not properly configured."
+);
 
-builder.Services.Configure<AgeFactorSettings>(builder.Configuration.GetSection("AgeFactor"));
-builder.Services.AddSingleton(resolver => resolver.GetRequiredService<IOptions<AgeFactorSettings>>().Value);
+// Register AgeFactorSettings (example: no real validation)
+builder.Services.AddValidatedSettings<AgeFactorSettings>(
+    builder.Configuration.GetSection("AgeFactor"),
+    settings => true
+);
 
 builder.Services.AddSingleton<IFactorCalculationMethod, EenLevenVruchtgebruikFactorMethod>();
 

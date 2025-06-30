@@ -1,10 +1,32 @@
-﻿using System.Text.Json;
+﻿using Microsoft.Extensions.Options;
+using System.Text.Json;
 using System.Threading.RateLimiting;
 
 namespace Vruchtgebruik.Api.Extensions
 {
-    public static class RateLimitingExtensions
+    public static class ServiceCollectionExtensions
     {
+        /// <summary>
+        /// Registers a strongly-typed settings object with options binding, validation, and startup check.
+        /// </summary>
+        public static IServiceCollection AddValidatedSettings<TSettings>(
+            this IServiceCollection services,
+            IConfigurationSection section,
+            Func<TSettings, bool> validate,
+            string? errorMessage = null)
+            where TSettings : class, new()
+        {
+            services.AddOptions<TSettings>()
+                .Bind(section)
+                .Validate(validate, errorMessage ?? $"Invalid configuration for {typeof(TSettings).Name}")
+                .ValidateOnStart();
+
+            // Also register as singleton for direct use (optional, for convenience)
+            services.AddSingleton(sp => sp.GetRequiredService<IOptions<TSettings>>().Value);
+
+            return services;
+        }
+
         /// <summary>
         /// Adds global rate limiting with a custom 429 response to the service collection.
         /// </summary>

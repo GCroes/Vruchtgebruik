@@ -19,7 +19,7 @@ namespace Vruchtgebruik.Api.Settings
         /// organized by version key (e.g., "2024").
         /// Each version contains a list of <see cref="EenLevenFactorRow"/>.
         /// </summary>
-        public Dictionary<string, List<EenLevenFactorRow>> Versions { get; set; } = null!;
+        public Dictionary<string, List<EenLevenFactorRow>>? Versions { get; set; }
     }
 
 }
