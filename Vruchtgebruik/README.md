@@ -1,4 +1,4 @@
-
+﻿
 # Vruchtgebruik Calculator
 
 A calculation tool with a .NET 8 Web API backend and Angular frontend.
@@ -62,6 +62,7 @@ After the Angular application is up and running, use the URLs below to navigate 
 - **API Swagger UI:** [http://localhost:5005/swagger](http://localhost:5005/swagger)
 - **Frontend UI:** [http://localhost:4200](http://localhost:4200)
 
+🚀 Ready to run!!!!
 ---
 
 ## Troubleshooting
