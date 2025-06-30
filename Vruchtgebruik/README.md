@@ -42,8 +42,7 @@ You can use the included PowerShell script to automate the build and startup of 
 ### Run the script from your working directory:
 
 ```powershell
-.
-run-local.ps1
+.\run-local.ps1
 ```
 
 **This will:**
