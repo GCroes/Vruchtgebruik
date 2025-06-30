@@ -7,11 +7,11 @@ namespace Vruchtgebruik.UnitTests
     public class CalculationRequestValidatorTests
     {
         [Theory]
-        [InlineData(1000, 35, "man", "EenLeven", true)]
-        [InlineData(-5, 35, "man", "EenLeven", false)]   // Invalid asset value
-        [InlineData(1000, -1, "man", "EenLeven", false)] // Invalid age
+        [InlineData(1000, 35, "male", "EenLeven", true)]
+        [InlineData(-5, 35, "male", "EenLeven", false)]   // Invalid asset value
+        [InlineData(1000, -1, "male", "EenLeven", false)] // Invalid age
         [InlineData(1000, 35, "", "EenLeven", false)]    // Empty sex
-        [InlineData(1000, 35, "vrouw", "", false)]       // Empty factor method
+        [InlineData(1000, 35, "female", "", false)]       // Empty factor method
         public void CalculationRequestValidator_ValidatesCorrectly(int assetValue, int age, string sex, string method, bool isValid)
         {
             var validator = new CalculationRequestValidator();

@@ -15,6 +15,12 @@
         /// The calculation result payload returned by the API.
         /// </summary>
         public CalculationResponse Response { get; set; }
+
+        public CalculationApiResponse(string correlationId, CalculationResponse response)
+        {
+            CorrelationId = correlationId;
+            Response = response;
+        }
     }
 
 

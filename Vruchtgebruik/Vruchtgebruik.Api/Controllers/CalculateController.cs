@@ -88,10 +88,9 @@ namespace Vruchtgebruik.Api.Controllers
 #if DEBUG
         /// <summary>
         ///     Triggers an unhandled exception to verify global error handling.
-        ///     <para>
-        ///     <b>Note:</b> This endpoint exists for integration testing of the API exception handler only.
-        ///     It should not be exposed in production.
-        ///     </para>
+        ///     
+        ///     Note: This endpoint exists for integration testing of the API exception handler only.
+        ///     It should NOT be exposed in production.
         /// </summary>
         /// <remarks>
         ///     Used by automated integration tests to confirm that the global exception handler

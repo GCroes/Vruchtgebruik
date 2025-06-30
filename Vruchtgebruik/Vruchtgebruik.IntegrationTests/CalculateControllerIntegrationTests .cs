@@ -29,7 +29,7 @@ namespace Vruchtgebruik.IntegrationTests
             {
                 AssetValue = 1000,
                 Age = 35,
-                Sex = "man",
+                Sex = "male",
                 FactorMethod = "EenLeven"
             };
 

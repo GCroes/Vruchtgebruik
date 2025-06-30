@@ -1,79 +1,97 @@
-# Vruchtgebruik - Local Run Script
-# ================================
-# This script will:
-# 1. Clone the GitHub repo (if not already present)
-# 2. Restore and build the ASP.NET Core API
-# 3. Run the API
-# 4. Restore and run the Angular app in a new window
+# Vruchtgebruik - Local Dev Script (clone, build, run API and Angular)
+# Place this script in D:\test and run from there
 
-# ---- CONFIG ----
-$RepoUrl = "https://github.com/gcroes/vruchtgebruik.git"
-$RootDir = "Vruchtgebruik"
-$ApiRepoDir = "Vruchtgebruik\Vruchtgebruik"
-$ApiProjectDir = "Vruchtgebruik.Api"
-$AngularDir = "Vruchtgebruik\Vruchtgebruik\Vruchtgebruik.FrontEnd\vruchtgebruik.frontend.client"
+function Test-PortAvailable {
+    param (
+        [Parameter(Mandatory = $true)][int]$Port
+    )
+    # Returns $true if port is NOT in use
+    $used = Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue | Where-Object { $_.State -eq "Listen" }
+    return -not $used
+}
+
+# ---- Preflight: Check API port ----
+$ApiPort = 5005   # Change if you use another port
+$AngularPort = 4200
 
 Write-Host ""
-Write-Host "==== STEP 1: Cloning the repository ====" -ForegroundColor Cyan
+Write-Host "==== PREFLIGHT: Checking required ports... ====" -ForegroundColor Yellow
 
-if (-not (Test-Path $RootDir)) {
+$apiPortOk = Test-PortAvailable $ApiPort
+if (-not $apiPortOk) {
+    Write-Host "ERROR: API port $ApiPort is already in use! Please free this port before running the script." -ForegroundColor Red
+    exit 1
+}
+else {
+    Write-Host "API port $ApiPort is available." -ForegroundColor Green
+}
+
+$ngPortOk = Test-PortAvailable $AngularPort
+if (-not $ngPortOk) {
+    Write-Host "ERROR: Angular port $AngularPort is already in use! Please free this port before running the script." -ForegroundColor Red
+    exit 1
+}
+else {
+    Write-Host "Angular port $AngularPort is available." -ForegroundColor Green
+}
+
+$RepoUrl = "https://github.com/gcroes/vruchtgebruik.git"
+$RepoDir = "vruchtgebruik"
+$ApiProjectDir = "$RepoDir\vruchtgebruik\Vruchtgebruik.Api"
+#$AngularDir = "$RepoDir\vruchtgebruik\vruchtgebruik.frontend\vruchtgebruik.frontend.client"
+$AngularDir = "vruchtgebruik.frontend\vruchtgebruik.frontend.client"
+
+# ---- STEP 0: Clone if needed ----
+Write-Host ""
+Write-Host "==== STEP 0: Cloning the repository if not present ====" -ForegroundColor Yellow
+if (-not (Test-Path $RepoDir)) {
     git clone $RepoUrl
     if ($LASTEXITCODE -ne 0) {
         Write-Error "Error cloning repository!"
         exit 1
     }
 } else {
-    Write-Host "Repository folder already exists. Skipping clone."
+    Write-Host "Repo folder already exists, skipping clone."
 }
+
+# Move into the repo for all remaining steps
+Set-Location $RepoDir\vruchtgebruik
 
 # ---- API ----
 Write-Host ""
-Write-Host "==== STEP 2: Restoring dependencies for API ====" -ForegroundColor Cyan
-Set-Location $ApiRepoDir
-dotnet restore $ApiProjectDir
+Write-Host "==== STEP 1: Restoring dependencies for API ====" -ForegroundColor Cyan
+dotnet restore "Vruchtgebruik.Api"
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Error restoring API dependencies!"
     exit 1
 }
 
 Write-Host ""
-Write-Host "==== STEP 3: Building the API ====" -ForegroundColor Cyan
-dotnet build $ApiProjectDir
+Write-Host "==== STEP 2: Building the API ====" -ForegroundColor Cyan
+dotnet build "Vruchtgebruik.Api"
 if ($LASTEXITCODE -ne 0) {
     Write-Error "API build failed!"
     exit 1
 }
 
-#Write-Host ""
-#Write-Host "`n==== STEP 4: Running the API ====" -ForegroundColor Cyan
-#Write-Host "Browse to http://localhost:5005/swagger after startup.`n"
-#dotnet run --project "$ProjectDir\Vruchtgebruik.Api.csproj" --urls "http://localhost:5005"
-#if ($LASTEXITCODE -ne 0) {
-#    Write-Error "API failed to start!"
-#    exit 1
-#}
-#Start-Sleep -Seconds 5
-
 Write-Host ""
-Write-Host "==== STEP 4: Running the API in a new window ====" -ForegroundColor Cyan
-# Start API in a new terminal window so script can continue
-$apiPath = Resolve-Path $ApiRepoDir
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd `"$apiPath`"; dotnet run --project `"$ApiProjectDir`""
+Write-Host "==== STEP 3: Running the API in a new window ====" -ForegroundColor Cyan
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd `"$PWD`"; dotnet run --project `"Vruchtgebruik.Api`""
 
 # ---- ANGULAR ----
 Write-Host ""
-Write-Host "==== STEP 5: Running Angular Frontend ====" -ForegroundColor Green
+Write-Host "==== STEP 4: Running Angular Frontend in a new window ====" -ForegroundColor Green
+
+Write-Host $AngularDir
 
 if (Test-Path $AngularDir) {
     Push-Location $AngularDir
 
-    # Install node modules if needed
     if (-not (Test-Path "node_modules")) {
         Write-Host "Installing Angular dependencies..."
         npm install
     }
 
-    # Start Angular in new window
     Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd $(Get-Location); npx ng serve"
     Pop-Location
 } else {
@@ -82,6 +100,7 @@ if (Test-Path $AngularDir) {
 
 Write-Host ""
 Write-Host "==== API and Angular frontend are running! ===="
-Write-Host "API:     http://localhost:5005 (or check launchSettings.json)"
+Write-Host "API:      http://localhost:5005 (or check launchSettings.json for your API port)"
 Write-Host "Frontend: http://localhost:4200"
-Write-Host "Stop API:  Run 'Get-Job | Stop-Job' in this window or Ctrl+C in Angular window."
+Write-Host "Stop API:   Close the API window"
+Write-Host "Stop Angular: Close the Angular window"
